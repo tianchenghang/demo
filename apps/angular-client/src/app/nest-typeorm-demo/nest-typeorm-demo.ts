@@ -20,14 +20,15 @@ import { MatSelectModule } from '@angular/material/select';
     MatSelectModule,
   ],
   template: `
-    <div>totalCount: {{ totalCount() }}</div>
-
     <mat-list>
+      <div matListItemTitle>peopleList, totalCount: {{ totalCount() }}</div>
       @for (people of peopleList(); track people.id) {
-      <mat-list-item>
-        <div matListItemTitle>id: {{ people.id }}, name: {{ people.name }}, age: {{ people.age }}</div>
-        <div matListItemLine>emailList</div>
-        <mat-list>
+      <mat-list-item matListItemLine>
+        <div matListItemLine>
+          id: {{ people.id }}, name: {{ people.name }}, age: {{ people.age }}
+        </div>
+        <mat-list matListItemLine>
+          <div matListItemTitle>emailList of {{ people.name }}</div>
           @for (email of people.emailList; track $index) {
           <mat-list-item matListItemLine>{{ email.addr }}</mat-list-item>
           } @empty {
@@ -36,7 +37,7 @@ import { MatSelectModule } from '@angular/material/select';
         </mat-list>
       </mat-list-item>
       } @empty {
-      <mat-list-item>Empty peopleList</mat-list-item>
+      <mat-list-item matListItemLine>Empty peopleList</mat-list-item>
       }
     </mat-list>
 
@@ -150,18 +151,18 @@ import { MatSelectModule } from '@angular/material/select';
     <form>
       <mat-form-field>
         <mat-label>emailAddr</mat-label>
-        <mat-select [(value)]="emailAddr">
+        <mat-select [(value)]="emailAddr" name="emailAddr">
           @for (addr of computedEmailAddrList(); track $index) {
-          <mat-option (value)="(addr)">{{ addr }}</mat-option>
+          <mat-option [value]="addr">{{ addr }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
 
       <mat-form-field>
         <mat-label>emailAddr2</mat-label>
-        <mat-select [(value)]="emailAddr2">
+        <mat-select [(value)]="emailAddr2" name="emailAddr2">
           @for (addr of computedEmailAddrList(); track $index) {
-          <mat-option (value)="(addr)">{{ addr }}</mat-option>
+          <mat-option [value]="addr">{{ addr }}</mat-option>
           }
         </mat-select>
       </mat-form-field>
@@ -224,58 +225,39 @@ export class NestTypeormDemo implements OnInit {
   }
 
   insertPeople() {
-    this.api.insertPeople(this.peopleFormData()).subscribe({
-      next: (res) => {
-        console.log('[insertPeople] res:', res);
-        this.resetPeopleFormData();
-        this.fetchPeopleList();
-      },
-      error: console.log,
+    this.api.insertPeople(this.peopleFormData()).subscribe(() => {
+      this.resetPeopleFormData();
+      this.fetchPeopleList();
     });
   }
 
   updatePeople() {
-    this.api.updatePeople(this.peopleFormData()).subscribe({
-      next: (res) => {
-        console.log('[updatePeople] res:', res);
-        this.resetPeopleFormData();
-      },
-      error: console.log,
+    this.api.updatePeople(this.peopleFormData()).subscribe(() => {
+      this.resetPeopleFormData();
     });
   }
 
   deletePeople(id: number) {
-    this.api.deletePeople(id).subscribe({
-      next: (res) => {
-        console.log('[deletePeople] res:', res);
-        this.fetchPeopleList();
-      },
-      error: console.log,
+    this.api.deletePeople(id).subscribe(() => {
+      this.fetchPeopleList();
     });
   }
 
   addPeopleEmail() {
-    this.api.addPeopleEmail(this.emailFormData()).subscribe({
-      next: (res) => {
-        console.log('[addPeopleEmail] res:', res);
-        this.resetEmailFormData();
-      },
-      error: console.log,
+    this.api.addPeopleEmail(this.emailFormData()).subscribe(() => {
+      this.resetEmailFormData();
+      this.fetchPeopleList();
     });
   }
 
   fetchPeopleList() {
-    this.api.fetchPeopleList(this.condFormData()).subscribe({
-      next: (res) => {
-        console.log('[fetchPeopleList] res:', res);
-        const data = res.data as {
-          peopleList: IPeople[];
-          totalCount: number;
-        };
-        this.peopleList.set(data.peopleList);
-        this.totalCount.set(data.totalCount);
-      },
-      error: console.log,
+    this.api.fetchPeopleList(this.condFormData()).subscribe((res) => {
+      const data = res.data as {
+        peopleList: IPeople[];
+        totalCount: number;
+      };
+      this.peopleList.set(data.peopleList);
+      this.totalCount.set(data.totalCount);
     });
   }
 
@@ -289,14 +271,10 @@ export class NestTypeormDemo implements OnInit {
   });
 
   swapEmailAddr() {
-    this.api.swapEmailAddr([this.emailAddr(), this.emailAddr2()]).subscribe({
-      next: (res) => {
-        console.log('[swapEmailAddr] res:', res);
-        this.emailAddr.set('<emailAddr>');
-        this.emailAddr2.set('<emailAddr2>');
-        this.fetchPeopleList();
-      },
-      error: console.log,
+    this.api.swapEmailAddr([this.emailAddr(), this.emailAddr2()]).subscribe(() => {
+      this.emailAddr.set('<emailAddr>');
+      this.emailAddr2.set('<emailAddr2>');
+      this.fetchPeopleList();
     });
   }
 
